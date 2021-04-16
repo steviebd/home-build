@@ -1,0 +1,8 @@
+smbus==1.1.post2
+sparkfun-qwiic-i2c==0.9.11
+sparkfun-qwiic-ccs811==0.9.4
+sparkfun-qwiic-bme280==0.9.0
+RPi.GPIO==0.7.0
+sparkfun-top-phat-button==0.0.2
+influxdb-client==1.16.0
+requests

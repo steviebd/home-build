@@ -1,0 +1,78 @@
+version: '3.6'
+
+volumes:
+  influx_data:
+    external: true
+  grafana_data:
+    external: true
+    
+services:  
+  sensor:
+    build: ./sensor
+    restart: unless-stopped
+    #  Installs and runs the i2c module so there is access to it to run the sensors. Note some bug with the top_phat_button script.  
+    # File "/usr/src/app/scripts/top_phat_button.py", line 49, in <module>
+    # channel = GPIO.wait_for_edge(reset_shutdown_pin, GPIO.FALLING, bouncetime=200)
+    # RuntimeError: Error waiting for edge
+    devices:  
+    - "/dev/i2c-1:/dev/i2c-1" 
+    - "/dev/gpiomem:/dev/gpiomem"
+    depends_on:
+      - influxdb
+    # 1. Join the internal network so Pi-hole can talk to cloudflared
+    # 2. Join the public network so it's reachable by systems on our LAN
+    env_file: database.env
+    #  Used to get the service to accurately pick up the sensors
+    privileged: true
+    networks:
+      internal:
+        ipv4_address: 175.40.9.3
+      priv_lan:
+        ipv4_address: 192.168.1.192
+
+  influxdb:
+    restart: unless-stopped
+    image: influxdb:2.0.4
+    # Attach influxdb only to the private network
+    networks:
+      internal:
+        ipv4_address: 175.40.9.2
+      priv_lan:
+        ipv4_address: 192.168.1.191
+    volumes:
+      - influx_data:/var/lib/influxdb2
+      - influx_data:/etc/influxdb2
+    ports:
+      - 8086
+      - 8088
+
+  grafana:
+    build: ./grafana
+    restart: unless-stopped
+    image: grafana/grafana:7.5.4
+    depends_on:
+      - influxdb
+    ports:
+      - 3000
+    volumes:
+      - 'grafana_data:/var/lib/grafana'
+    environment:
+      - 'GF_INSTALL_PLUGINS=grafana-clock-panel'
+    networks:
+      internal:
+        ipv4_address: 175.40.9.4
+      priv_lan:
+        ipv4_address: 192.168.1.190
+
+networks:
+  # Create the internal network
+  internal:
+    ipam:
+      config:
+        - subnet: 175.40.9.0/29
+
+  # The priv_lan network is already setup, so it is an 'external' network
+  priv_lan:
+    external:
+      name: priv_lan
+
