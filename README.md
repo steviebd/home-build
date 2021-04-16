@@ -1,6 +1,6 @@
 # Raspberry Pi Ad Block and home weather monitoring with dockers
 
-Docker containers running on [Ubuntu Server 20.04.2 LTS](https://ubuntu.com/download/raspberry-pi)
+Docker containers running on [Ubuntu Server 20.04.2 LTS](https://ubuntu.com/download/raspberry-pi).
 
 ## Pihole with Cloudflare
 
