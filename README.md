@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# home-server
-=======
 # Raspberry Pi Ad Block and home weather monitoring with dockers
 
 Docker containers running on [Ubuntu Server 20.04.2 LTS](https://ubuntu.com/download/raspberry-pi)
@@ -64,4 +61,3 @@ Finally under weather_bom.py / BOMURL please point the URL to your local data fe
 A template dashboard will be in place with some of the datapoints. Follow the [instructions here](https://grafana.com/docs/grafana/latest/datasources/influxdb/) to connect Grafana to Influx DB via Flux.
 
 Queries can only be made with Flux and not the older InfluxQL.
->>>>>>> commit to master]
