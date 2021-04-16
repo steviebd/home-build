@@ -8,6 +8,16 @@ Using Mr Roach for the detailed [guide](http://mroach.com/2020/08/pi-hole-and-cl
 
 [VisiblitySpots](https://github.com/visibilityspots/dockerfile-cloudflared) for the dockerfile to help get Cloudflare DoH working on a Raspberry Pi 4.
 
+Cloudflare has been set to only communicate with PiHole with a seperate network and flow using Docker ```macvlan```.
+
+Please read through Mr Roach's excellent explination on it and how to set it up in your environment.
+
+Once done make sure to change your:
+``` priv_lan:
+        ipv4_address: 192.168.1.200```
+
+To something in your network. You can then access the PiHole dashboard at xxx.xxx.x.xxx/admin.
+
 ## Home Weather Monitoring
 
 Built on Raspberry Pi 4 with the [SparkFun Environmental Combo Breakout - CCS811/BME280 (Qwiic)](https://github.com/sparkfun/Qwiic_BME280_CCS811_Combo) on Python.
@@ -29,7 +39,15 @@ Add a database.env file and input the following details
 
 Sensor uses Python and [influxdb-client-python](https://github.com/influxdata/influxdb-client-python) libaries to write into influxdb.
 
+
 ## Setup of initial persistant InfluxDB database and users
+
+You will need to change your InfluxDB external address in the docker-compose.yml file to match your internal network settings.
+
+``` priv_lan:
+        ipv4_address: 192.168.1.191```
+
+You can then access the InfluxDB database @ xxx.xxx.x.xxx:8086.
 
 Setup details can be found [here](https://docs.influxdata.com/influxdb/v2.0/reference/cli/influx/setup/) and the easiest way is to open up the influxdb url @ http://deviceIP:8086 and follow the intial setup prompts.
 
@@ -40,6 +58,15 @@ Alternatively you can open up a CLI terminal on the docker and type in:
 and follow the prompts.
 
 ## Setup of scripts for the sensor
+
+You will need to change your Sensor external address in the docker-compose.yml file to match your internal network settings.
+
+``` priv_lan:
+        ipv4_address: 192.168.1.192```
+
+Environmental files would need to be added. Default is 'database.env' on the composer
+
+The following fields are needed:
 
     - INFLUX_DB_BUCKET: ${Your influxdb bucket that was setup}
     - INFLUX_DB_TOKEN: ${Your influxdb token} 
