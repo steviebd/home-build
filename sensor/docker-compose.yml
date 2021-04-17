@@ -64,6 +64,23 @@ services:
       priv_lan:
         ipv4_address: 192.168.1.190
 
+  telegraf:
+    env_file: database.env
+    image: telegraf
+
+    depends_on:
+      - influxdb
+    volumes:
+      - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    ports:
+      - 8125
+      - 8092:8092/udp
+      - 8094
+    networks:
+      internal:
+        ipv4_address: 175.40.9.5    
+
+
 networks:
   # Create the internal network
   internal:

@@ -3,6 +3,8 @@ from time import sleep
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 import os
+from requests.exceptions import ConnectionError
+import requests
 
 # Variables used and inputted into the fuctions
 my_bucket = os.getenv("INFLUX_DB_BUCKET")

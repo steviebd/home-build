@@ -1,0 +1,29 @@
+version: '3.6'
+
+volumes:
+  unifi_data:
+    external: true
+    
+services:  
+  unifi:
+    restart: unless-stopped
+    image: jacobalberty/unifi
+    ports:
+      - 8080:8080/tcp
+      - 8443:8443/tcp
+      - 8843:8843/tcp
+      - 8880:8880/tcp
+      - 3478:3478/udp
+    volumes:
+      - 'unifi_data:/unifi'
+    environment:
+      - 'TZ=Australia/Sydney'
+    networks:
+      priv_lan:
+        ipv4_address: 192.168.1.195
+
+networks:
+  # The priv_lan network is already setup, so it is an 'external' network
+  priv_lan:
+    external:
+      name: priv_lan
