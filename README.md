@@ -8,13 +8,17 @@ Using Mr Roach for the detailed [guide](http://mroach.com/2020/08/pi-hole-and-cl
 
 [VisiblitySpots](https://github.com/visibilityspots/dockerfile-cloudflared) for the dockerfile to help get Cloudflare DoH working on a Raspberry Pi 4.
 
-Cloudflare has been set to only communicate with PiHole with a seperate network and flow using Docker ```macvlan```.
+Cloudflare has been set to only communicate with PiHole with a seperate network and flow using Docker 
+```macvlan
+```
 
 Please read through Mr Roach's excellent explination on it and how to set it up in your environment.
 
 Once done make sure to change your:
-``` priv_lan:
-        ipv4_address: 192.168.1.200```
+```
+        priv_lan:
+                ipv4_address: 192.168.1.200
+```
 
 To something in your network. You can then access the PiHole dashboard at xxx.xxx.x.xxx/admin.
 
@@ -44,8 +48,10 @@ Sensor uses Python and [influxdb-client-python](https://github.com/influxdata/in
 
 You will need to change your InfluxDB external address in the docker-compose.yml file to match your internal network settings.
 
-``` priv_lan:
-        ipv4_address: 192.168.1.191```
+```
+        priv_lan:
+                ipv4_address: 192.168.1.191
+```
 
 You can then access the InfluxDB database @ xxx.xxx.x.xxx:8086.
 
@@ -61,8 +67,10 @@ and follow the prompts.
 
 You will need to change your Sensor external address in the docker-compose.yml file to match your internal network settings.
 
-``` priv_lan:
-        ipv4_address: 192.168.1.192```
+``` 
+        priv_lan:
+                ipv4_address: 192.168.1.192
+```
 
 Environmental files would need to be added. Default is 'database.env' on the composer
 
