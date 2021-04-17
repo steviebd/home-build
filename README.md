@@ -9,7 +9,8 @@ Using Mr Roach for the detailed [guide](http://mroach.com/2020/08/pi-hole-and-cl
 [VisiblitySpots](https://github.com/visibilityspots/dockerfile-cloudflared) for the dockerfile to help get Cloudflare DoH working on a Raspberry Pi 4.
 
 Cloudflare has been set to only communicate with PiHole with a seperate network and flow using Docker 
-```macvlan
+```
+macvlan
 ```
 
 Please read through Mr Roach's excellent explination on it and how to set it up in your environment.
