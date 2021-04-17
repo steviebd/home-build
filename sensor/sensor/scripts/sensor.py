@@ -1,6 +1,6 @@
 from multiprocessing import Process
 # Run all python scripts at the same time
-
+from time import sleep
 
 def one(): import bme280
 def two(): import ccs811

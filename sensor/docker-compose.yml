@@ -71,7 +71,7 @@ services:
     depends_on:
       - influxdb
     volumes:
-      - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      - ./tele.conf:/etc/telegraf/telegraf.conf:ro
     ports:
       - 8125
       - 8092:8092/udp
