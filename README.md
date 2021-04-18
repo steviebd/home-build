@@ -81,14 +81,17 @@ The following fields are needed:
     - INFLUX_DB_TOKEN: ${Your influxdb token} 
     - INFLUX_DB_ORG: ${Your influxdb organisation name}
     - DEVICE_DB_LOCATION: ${Input flag to filter by location of devices}
+    - TELEGRAF_TOKEN: ${Your telegraf token for InfluxDB (If you created a new bucket else use your other token)}
 
 Alternatively you can go into the Python scripts and hardcode these values in directly.
 
-Scripts needed are:
+Scripts and configurations that use env variables are:
 
+    - telegraf.conf
     - bme280.py
     - ccs811.py
     - weather_bom.py
+    - dbwriter.py
 
 Finally under weather_bom.py / BOMURL please point the URL to your local data feed under [Observations - Individual Stations](http://www.bom.gov.au/catalogue/data-feeds.shtml) as these feeds provide the necessary .json files which this is written in to accept.
 

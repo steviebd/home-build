@@ -9,5 +9,5 @@ Thumbs.db
 unifi/
 pihole/piehole.env
 sensor/sensor/database.env
-
+dev
 sensor/database.env

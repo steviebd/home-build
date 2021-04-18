@@ -10,25 +10,15 @@ services:
   sensor:
     build: ./sensor
     restart: unless-stopped
-    #  Installs and runs the i2c module so there is access to it to run the sensors. Note some bug with the top_phat_button script.  
-    # File "/usr/src/app/scripts/top_phat_button.py", line 49, in <module>
-    # channel = GPIO.wait_for_edge(reset_shutdown_pin, GPIO.FALLING, bouncetime=200)
-    # RuntimeError: Error waiting for edge
-    devices:  
-    - "/dev/i2c-1:/dev/i2c-1" 
-    - "/dev/gpiomem:/dev/gpiomem"
+    # Access to the Raspberry Pi system. I2C for the connection to the pHat pins for the sensors. GPIO for the shutdown buttons. Normal device functions don't seem to be working
+    privileged: true
     depends_on:
       - influxdb
-    # 1. Join the internal network so Pi-hole can talk to cloudflared
-    # 2. Join the public network so it's reachable by systems on our LAN
+    # 1. Join the internal network so Sensor can upload data to the database
     env_file: database.env
-    #  Used to get the service to accurately pick up the sensors
-    privileged: true
     networks:
       internal:
         ipv4_address: 175.40.9.3
-      priv_lan:
-        ipv4_address: 192.168.1.192
 
   influxdb:
     restart: unless-stopped
@@ -67,15 +57,22 @@ services:
   telegraf:
     env_file: database.env
     image: telegraf
-
     depends_on:
       - influxdb
-    volumes:
-      - ./tele.conf:/etc/telegraf/telegraf.conf:ro
     ports:
       - 8125
       - 8092:8092/udp
       - 8094
+    environment:
+      HOST_PROC: /rootfs/proc
+      HOST_SYS: /rootfs/sys
+      HOST_ETC: /rootfs/etc
+    volumes:
+      - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /sys:/rootfs/sys:ro
+      - /proc:/rootfs/proc:ro
+      - /etc:/rootfs/etc:ro
     networks:
       internal:
         ipv4_address: 175.40.9.5    
