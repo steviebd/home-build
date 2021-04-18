@@ -42,7 +42,7 @@ def shut_down():
 
 while True:
     #short delay, otherwise this code will take up a lot of the Pi's processing power
-    time.sleep(0.5)
+    time.sleep(1)
 
     # wait for a button press with switch debounce on the falling edge so that this script
     # is not taking up too many resources in order to shutdown/reboot the Pi safely

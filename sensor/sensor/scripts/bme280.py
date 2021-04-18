@@ -30,4 +30,4 @@ while True:
     x = convertdata()
     y = writeinflux.writetodb(data_points=x)
     print("wrote to database successfully")
-    sleep(10)    
+    sleep(20)    
