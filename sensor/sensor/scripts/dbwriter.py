@@ -5,7 +5,7 @@ from influxdb_client import InfluxDBClient, Point, WriteOptions
 my_bucket = os.getenv("INFLUX_DB_BUCKET")
 influx_token = os.getenv("INFLUX_DB_TOKEN")
 influx_org = os.getenv("INFLUX_DB_ORG")
-influx_url = "http://influxd_test:8086"
+influx_url = "http://influxdb:8086"
 
 class writeinflux:
     def writetodb(data_points):
