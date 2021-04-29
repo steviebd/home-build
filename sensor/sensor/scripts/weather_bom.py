@@ -36,7 +36,7 @@ def pulldatafrombom():
 
 def convertdata():
     bom_data = pulldatafrombom()
-    raw_data = json.loads(bom_data.content.decode())
+    raw_data = json.loads(bom_data)
     location = raw_data['observations']['header'][0]['name'] + ", " + raw_data['observations']['header'][0]['state_time_zone']    
     data_points = []
     for values in raw_data['observations']['data']:
@@ -50,5 +50,5 @@ def convertdata():
 while True:
     x = convertdata()
     y = writeinflux.writetodb(data_points=x)
-    print("wrote to database successfully")
+    print("wrote BOM to database successfully")
     sleep(600)

@@ -29,5 +29,5 @@ def convertdata():
 while True:
     x = convertdata()
     y = writeinflux.writetodb(data_points=x)
-    print("wrote to database successfully")
+    print("wrote BME280 to database successfully")
     sleep(20)    
