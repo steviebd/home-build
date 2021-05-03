@@ -25,18 +25,22 @@ def pulldatafrombom():
         r = requests.get(BOMURL)
     except requests.exceptions.ConnectionError:
         sleep(7200)
-        print('Connection to the website or database is down.. Waiting to retry')       
+        print('Connection to the website or database is down.. Waiting to retry')
+        r = requests.get(BOMURL)        
     except requests.exceptions.TooManyRedirects:
         print('URL is bad and try a different one')
     except requests.exceptions.RequestException as e:
         # catastrophic error. bail.
-        raise SystemExit(e)
+        # raise SystemExit(e)
+        print(e)
+        sleep (7200)
+        r = requests.get(BOMURL)        
     return r
 
 
 def convertdata():
     bom_data = pulldatafrombom()
-    raw_data = json.loads(bom_data)
+    raw_data = json.loads(bom_data.content.decode())
     location = raw_data['observations']['header'][0]['name'] + ", " + raw_data['observations']['header'][0]['state_time_zone']    
     data_points = []
     for values in raw_data['observations']['data']:
