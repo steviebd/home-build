@@ -58,8 +58,9 @@ while True:
         print("wrote BOM to database successfully")
     except Exception as e:
         print("error with reading and converting data ", e)
+        sleep(1200)
         pass
-    sleep(1200)
+    sleep(700)
 
 
 
