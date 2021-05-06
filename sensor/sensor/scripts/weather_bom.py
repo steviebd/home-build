@@ -57,7 +57,7 @@ while True:
         y = writeinflux.writetodb(data_points=x)
         print("wrote BOM to database successfully")
     except Exception as e:
-        print("error with reading and converting data ", e))
+        print("error with reading and converting data ", e)
         pass
     sleep(1200)
 
