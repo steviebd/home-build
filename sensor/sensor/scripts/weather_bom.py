@@ -52,7 +52,19 @@ def convertdata():
     return data_points
 
 while True:
-    x = convertdata()
-    y = writeinflux.writetodb(data_points=x)
-    print("wrote BOM to database successfully")
-    sleep(600)
+    try:
+        x = convertdata()
+        y = writeinflux.writetodb(data_points=x)
+        print("wrote BOM to database successfully")
+    except Exception as e:
+        print("error with reading and converting data ", e))
+        pass
+    sleep(1200)
+
+
+
+#   File "/usr/src/app/scripts/weather_bom.py", line 43, in convertdata
+#     raw_data = json.loads(bom_data.content.decode())
+#   File "/usr/local/lib/python3.9/json/decoder.py", line 355, in raw_decode
+#     raise JSONDecodeError("Expecting value", s, err.value) from None
+# json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
