@@ -1,22 +1,17 @@
+version: '2.4'
 
+volumes:
+  prometheus_data:
 
-services:  
-  # Sensor service - exposes metrics for Prometheus scraping
+services:
   sensor:
     build: ./sensor/sensor
-    restart: unless-stopped
-    # Access to the Raspberry Pi system. I2C for sensor communication, GPIO for shutdown buttons
     privileged: true
     ports:
-      - "8000:8000"  # Metrics endpoint
-    labels:
-      io.balena.features.dbus: '1'
-      io.balena.features.supervisor-api: '1'
+      - "8000:8000"
 
-  # Prometheus - local monitoring and forwarding to Grafana Cloud
   prometheus:
-    image: prom/prometheus:v2.55.1
-    restart: unless-stopped
+    build: ./prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -27,5 +22,4 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./sensor/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
