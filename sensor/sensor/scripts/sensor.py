@@ -7,5 +7,4 @@ def two(): import ccs811
 
 Process(target=one).start()
 Process(target=two).start()
-Process(target=three).start()
 # Process(target=four).start()

@@ -1,7 +1,7 @@
 import os
 import qwiic_ccs811
 from time import sleep
-from dbwriter import writeinflux
+from grafana_cloud_writer import GrafanaCloudPushGateway
 
 # Variables used and inputted into the fuctions
 location = os.getenv("DEVICE_DB_LOCATION")
@@ -24,8 +24,11 @@ def convertdata():
     data_return = [co2_level, tvoc_level]
     return data_return
 
+# Initialize Grafana Cloud writer
+cloud_writer = GrafanaCloudPushGateway()
+
 while True:
     x = convertdata()
-    y = writeinflux.writetodb(data_points=x)
-    print("wrote CCS811 to database successfully")
+    cloud_writer.push_metrics("ccs811_sensor", x)
+    print("wrote CCS811 to Grafana Cloud successfully")
     sleep(60)

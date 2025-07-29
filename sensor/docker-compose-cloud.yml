@@ -1,0 +1,18 @@
+version: '3.6'
+
+services:  
+  sensor:
+    build: ./sensor
+    restart: unless-stopped
+    # Access to the Raspberry Pi system. I2C for the connection to the pHat pins for the sensors. GPIO for the shutdown buttons.
+    privileged: true
+    env_file: grafana-cloud.env
+    networks:
+      priv_lan:
+        ipv4_address: 192.168.1.192
+
+networks:
+  # The priv_lan network is already setup, so it is an 'external' network
+  priv_lan:
+    external:
+      name: priv_lan

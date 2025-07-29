@@ -1,0 +1,13 @@
+applicationName: "home-monitoring-system"
+name: "home-weather-monitoring"
+version: "1.0.0"
+description: "IoT environmental monitoring system with InfluxDB, Grafana, and environmental sensors"
+
+fleet-configuration:
+  RESIN_HOST_CONFIG_gpu_mem: 64
+  RESIN_HOST_CONFIG_enable_uart: 1
+  RESIN_HOST_CONFIG_dtparam: "i2c_arm=on,spi=on"
+  RESIN_HOST_CONFIG_dtoverlay: "i2c-rtc,ds3231"
+
+build-variables:
+  - DEBIAN_FRONTEND=noninteractive

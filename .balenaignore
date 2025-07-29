@@ -1,0 +1,13 @@
+.git
+.gitignore
+README.md
+.env
+*.md
+.DS_Store
+node_modules
+*.log
+.vscode
+sensor/docker-compose.yml
+sensor/docker-compose-cloud.yml
+sensor/README-GRAFANA-CLOUD.md
+sensor/grafana-cloud.env.example

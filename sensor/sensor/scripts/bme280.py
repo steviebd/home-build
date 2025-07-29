@@ -1,7 +1,7 @@
 import os
 import qwiic_bme280
 from time import sleep
-from dbwriter import writeinflux
+from grafana_cloud_writer import GrafanaCloudPushGateway
 
 
 # Measurement name to import to the database
@@ -26,8 +26,11 @@ def convertdata():
     return data_return
 
 
+# Initialize Grafana Cloud writer
+cloud_writer = GrafanaCloudPushGateway()
+
 while True:
     x = convertdata()
-    y = writeinflux.writetodb(data_points=x)
-    print("wrote BME280 to database successfully")
+    cloud_writer.push_metrics("bme280_sensor", x)
+    print("wrote BME280 to Grafana Cloud successfully")
     sleep(60)    

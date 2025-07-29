@@ -1,10 +1,23 @@
-FROM python:3.9.4-buster
+FROM balenalib/raspberrypi4-64-python:3.9-run
 
-# Copy requirements.txt and scripts folder to /usr/src/app
-COPY ./scripts /usr/src/app/scripts
-COPY ./requirements.txt /usr/src/app
-# Install Python package dependencies in requirements.txt
-RUN pip3 install --requirement /usr/src/app/requirements.txt
-# Start the i2c bus on debian to make sure the CCS811 sensor works
-CMD python3 /usr/src/app/scripts/sensor.py
-# modprobe i2c-dev && 
+# Enable systemd init system
+ENV INITSYSTEM on
+
+# Install system dependencies for I2C and GPIO
+RUN install_packages i2c-tools python3-dev gcc
+
+# Set working directory
+WORKDIR /usr/src/app
+
+# Copy requirements and install Python dependencies
+COPY ./requirements.txt .
+RUN pip3 install --no-cache-dir -r requirements.txt
+
+# Copy application scripts
+COPY ./scripts ./scripts
+
+# Enable I2C interface
+RUN echo 'i2c-dev' >> /etc/modules
+
+# Start the sensor application
+CMD ["python3", "/usr/src/app/scripts/sensor.py"] 
