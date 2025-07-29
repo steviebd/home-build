@@ -1,28 +1,3 @@
-# Raspberry Pi Ad Block and home weather monitoring with dockers
-
-Docker containers running on [Ubuntu Server 20.04.2 LTS](https://ubuntu.com/download/raspberry-pi).
-
-## Pihole with Cloudflare
-
-Using Mr Roach for the detailed [guide](http://mroach.com/2020/08/pi-hole-and-cloudflared-with-docker/#background-and-pre-configuration) on setting up PiHole and Cloudflared DoH networking and understand on how to set it up securely.
-
-[VisiblitySpots](https://github.com/visibilityspots/dockerfile-cloudflared) for the dockerfile to help get Cloudflare DoH working on a Raspberry Pi 4.
-
-Cloudflare has been set to only communicate with PiHole with a seperate network and flow using Docker 
-```
-macvlan
-```
-
-Please read through Mr Roach's excellent explination on it and how to set it up in your environment.
-
-Once done make sure to change your:
-```
-        priv_lan:
-                ipv4_address: 192.168.1.200
-```
-
-To something in your network. You can then access the PiHole dashboard at xxx.xxx.x.xxx/admin.
-
 ## Home Weather Monitoring
 
 Built on Raspberry Pi 4 with the [SparkFun Environmental Combo Breakout - CCS811/BME280 (Qwiic)](https://github.com/sparkfun/Qwiic_BME280_CCS811_Combo) on Python.
