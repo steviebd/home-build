@@ -134,3 +134,5 @@ docker-compose down
 ---
 
 *Built with Python 3.12, Docker, and [Balena.io](https://balena.io) platform. Based on [influxdb-client-python](https://github.com/influxdata/influxdb-client-python) and SparkFun Qwiic libraries.*
+
+# For Balena builds it seems like you have to hard code secrets in the docker file
