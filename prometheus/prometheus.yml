@@ -6,10 +6,10 @@ global:
 
 # Remote write configuration to forward metrics to Grafana Cloud
 remote_write:
-  - url: '${GRAFANA_CLOUD_PUSH_URL}'
+  - url: ${GRAFANA_CLOUD_PUSH_URL}
     basic_auth:
-      username: '${GRAFANA_CLOUD_USERNAME}'
-      password: '${GRAFANA_CLOUD_PASSWORD}'
+      username: ${GRAFANA_CLOUD_USERNAME}
+      password: ${GRAFANA_CLOUD_PASSWORD}
 
 # Scrape configuration
 scrape_configs:
