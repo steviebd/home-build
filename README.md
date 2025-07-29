@@ -1,77 +1,126 @@
-## Home Weather Monitoring
+# Home Weather Monitoring System
 
-Built on Raspberry Pi 4 with the [SparkFun Environmental Combo Breakout - CCS811/BME280 (Qwiic)](https://github.com/sparkfun/Qwiic_BME280_CCS811_Combo) on Python.
+IoT environmental monitoring using BME280/CCS811 sensors on Raspberry Pi 4 with Docker deployment options.
 
-Using [Balena.io](http://balena.io/) who provide a full technology stack develop, deploy, and manage projects at any scale; all on the cloud.
+## Quick Start
 
-Pihole + unbound copied from [klutchell](https://github.com/klutchell/balena-pihole).
+```bash
+# Configure environment
+cp .env.example .env
+# Edit .env with your credentials
 
-pHAT Shutown button copied from [sparkfun reboot and shutdown guide](https://learn.sparkfun.com/tutorials/raspberry-pi-safe-reboot-and-shutdown-button/all).
+# Deploy to Grafana Cloud (recommended)
+docker-compose --profile cloud up -d
 
-## Enviromental Variables Used
-
-Add a database.env file and input the following details
-
-    - DEVICE_DB_LOCATION = The device location
-    - INFLUX_DB_BUCKET = The bucket name for Influx DB
-    - INFLUX_DB_TOKEN = Token generated from Influx DB. More infomration can be found at [InfluxDB's documentation](https://docs.influxdata.com/influxdb/v2.0/security/tokens/)
-    - INFLUX_DB_ORG = The organisation ID for your bucket
-
-Sensor uses Python and [influxdb-client-python](https://github.com/influxdata/influxdb-client-python) libaries to write into influxdb.
-
-
-## Setup of initial persistant InfluxDB database and users
-
-You will need to change your InfluxDB external address in the docker-compose.yml file to match your internal network settings.
-
-```
-        priv_lan:
-                ipv4_address: 192.168.1.191
+# OR deploy locally  
+docker-compose --profile local up -d
 ```
 
-You can then access the InfluxDB database @ xxx.xxx.x.xxx:8086.
+## Hardware
 
-Setup details can be found [here](https://docs.influxdata.com/influxdb/v2.0/reference/cli/influx/setup/) and the easiest way is to open up the influxdb url @ http://deviceIP:8086 and follow the intial setup prompts.
+- **Raspberry Pi 4** with I2C enabled
+- **[SparkFun Environmental Combo Breakout - CCS811/BME280 (Qwiic)](https://github.com/sparkfun/Qwiic_BME280_CCS811_Combo)**
+- **Optional:** pHAT shutdown button
 
-Alternatively you can open up a CLI terminal on the docker and type in:
+## Deployment Options
 
-    influx setup 
+### Grafana Cloud (Recommended)
+✅ No local infrastructure • ✅ Remote access • ✅ Built-in alerting
 
-and follow the prompts.
+1. Sign up at https://grafana.com (free tier available)
+2. Get credentials: Cloud Portal > Prometheus > Details
+3. Add to `.env`: `GRAFANA_CLOUD_PUSH_URL`, `GRAFANA_CLOUD_USERNAME`, `GRAFANA_CLOUD_PASSWORD`
 
-## Setup of scripts for the sensor
+### Local Infrastructure
+✅ Full data control • ❌ Manual maintenance required
 
-You will need to change your Sensor external address in the docker-compose.yml file to match your internal network settings.
+Uses local InfluxDB 2.0.4, Grafana 7.5.4, and Telegraf containers.
 
-``` 
-        priv_lan:
-                ipv4_address: 192.168.1.192
+### Balena Cloud
+✅ Fleet management • ✅ OTA updates • ✅ Remote monitoring
+
+```bash
+balena login
+balena app create home-monitoring --type raspberrypi4-64
+balena push home-monitoring
 ```
 
-Environmental files would need to be added. Default is 'database.env' on the composer
+Set environment variables in Balena dashboard or via CLI.
 
-The following fields are needed:
+## Metrics
 
-    - INFLUX_DB_BUCKET: ${Your influxdb bucket that was setup}
-    - INFLUX_DB_TOKEN: ${Your influxdb token} 
-    - INFLUX_DB_ORG: ${Your influxdb organisation name}
-    - DEVICE_DB_LOCATION: ${Input flag to filter by location of devices}
-    - TELEGRAF_TOKEN: ${Your telegraf token for InfluxDB (If you created a new bucket else use your other token)}
+**Environmental (BME280):**
+- `bme280_humidity` - Humidity %
+- `bme280_pressure` - Atmospheric pressure  
+- `bme280_celsius` - Temperature °C
+- `bme280_dewpoint_celsius` - Dew point
 
-Alternatively you can go into the Python scripts and hardcode these values in directly.
+**Air Quality (CCS811):**
+- `ccs811_co2` - CO2 levels (ppm)
+- `ccs811_tvoc` - Total VOCs
 
-Scripts and configurations that use env variables are:
+All metrics include `location` tag for filtering.
 
-    - telegraf.conf
-    - bme280.py
-    - ccs811.py
-    - weather_bom.py
-    - dbwriter.py
+## Configuration
 
-Finally under weather_bom.py / BOMURL please point the URL to your local data feed under [Observations - Individual Stations](http://www.bom.gov.au/catalogue/data-feeds.shtml) as these feeds provide the necessary .json files which this is written in to accept.
+**Required Environment Variables:**
+```bash
+# Device location tag
+DEVICE_DB_LOCATION=home
 
-## Setup of Grafana
+# Grafana Cloud (recommended)
+GRAFANA_CLOUD_PUSH_URL=https://prometheus-prod-XX.grafana.net/api/prom/push
+GRAFANA_CLOUD_USERNAME=your_username  
+GRAFANA_CLOUD_PASSWORD=your_password
 
-A template dashboard will be in place with some of the datapoints. Follow the [instructions here](https://grafana.com/docs/grafana/latest/datasources/influxdb/) to connect Grafana to Influx DB via Flux.
+# Local setup (alternative)
+INFLUX_DB_BUCKET=home_monitoring
+INFLUX_DB_TOKEN=your_token
+INFLUX_DB_ORG=your_org
+```
 
-Queries can only be made with Flux and not the older InfluxQL.
+## Commands
+
+```bash
+# View logs
+docker-compose logs sensor
+
+# Restart
+docker-compose --profile cloud restart
+
+# Stop
+docker-compose down
+
+# Local InfluxDB setup (if using local mode)
+# Access http://device-ip:8086 for initial setup
+```
+
+## Architecture
+
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   BME280/CCS811 │───▶│  Raspberry Pi    │───▶│  Grafana Cloud  │
+│     Sensors     │    │   (Docker)       │    │   OR Local DB   │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+```
+
+## Troubleshooting
+
+**Sensor issues:**
+- Enable I2C: `sudo raspi-config` > Interface > I2C
+- Check wiring and power
+- View logs: `docker-compose logs sensor`
+
+**Network issues:**
+- Verify `priv_lan` network exists
+- Check internet connectivity (cloud mode)
+- Ensure Docker daemon is running
+
+**Balena deployment:**
+- Privileged containers enabled for GPIO/I2C access
+- Host features: procfs, sysfs for system monitoring
+- Volume persistence for data storage
+
+---
+
+*Built with Python 3.9, Docker, and [Balena.io](https://balena.io) platform. Based on [influxdb-client-python](https://github.com/influxdata/influxdb-client-python) and SparkFun Qwiic libraries.*
