@@ -4,7 +4,7 @@ FROM balenalib/raspberrypi4-64-debian:bullseye-run
 ENV INITSYSTEM on
 
 # Install system dependencies for I2C and GPIO
-RUN install_packages i2c-tools python3-dev gcc python3-pip
+RUN install_packages i2c-tools python3-dev gcc python3-pip build-essential
 
 # Set working directory
 WORKDIR /usr/src/app
