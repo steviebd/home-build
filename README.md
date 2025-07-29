@@ -1,6 +1,6 @@
 # Home Weather Monitoring System
 
-IoT environmental monitoring using BME280/CCS811 sensors on Raspberry Pi 4 with Grafana Cloud integration.
+IoT environmental monitoring using BME280/CCS811 sensors on Raspberry Pi 4 with local Prometheus and Grafana Cloud integration.
 
 ## Quick Start
 
@@ -19,10 +19,19 @@ docker-compose up -d
 - **[SparkFun Environmental Combo Breakout - CCS811/BME280 (Qwiic)](https://github.com/sparkfun/Qwiic_BME280_CCS811_Combo)**
 - **Optional:** pHAT shutdown button
 
+## Architecture
+
+The system uses a two-tier monitoring approach:
+- **Local Prometheus** collects and stores sensor metrics locally
+- **Grafana Cloud** receives metrics via Prometheus remote_write for cloud monitoring
+
+### Benefits:
+✅ Local data retention • ✅ Network resilience • ✅ Cloud monitoring • ✅ Local access to metrics
+
 ## Deployment Options
 
-### Grafana Cloud
-✅ No local infrastructure • ✅ Remote access • ✅ Built-in alerting • ✅ Automatic scaling
+### Standard Deployment
+Local Prometheus + Grafana Cloud integration:
 
 1. Sign up at https://grafana.com (free tier available)
 2. Get credentials: Cloud Portal > Prometheus > Details
@@ -66,26 +75,36 @@ GRAFANA_CLOUD_USERNAME=your_username
 GRAFANA_CLOUD_PASSWORD=your_password
 ```
 
+## Services & Access
+
+- **Prometheus UI**: http://device-ip:9090 (local metrics, queries, alerts)
+- **Sensor Metrics**: http://device-ip:8000/metrics (raw Prometheus format)
+- **Grafana Cloud**: Remote dashboards and alerting
+
 ## Commands
 
 ```bash
-# View logs
-docker-compose logs sensor
+# View all logs
+docker-compose logs
 
-# Restart
+# View specific service logs
+docker-compose logs sensor
+docker-compose logs prometheus
+
+# Restart services
 docker-compose restart
 
-# Stop
+# Stop all services
 docker-compose down
 ```
 
-## Architecture
+## Data Flow
 
 ```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   BME280/CCS811 │───▶│  Raspberry Pi    │───▶│  Grafana Cloud  │
-│     Sensors     │    │   (Docker)       │    │                 │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   BME280/CCS811 │───▶│  Python Scripts  │───▶│  Prometheus     │───▶│  Grafana Cloud  │
+│     Sensors     │    │  (HTTP metrics)  │    │  (local DB)     │    │  (remote_write) │
+└─────────────────┘    └──────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
 ## Troubleshooting
@@ -94,6 +113,12 @@ docker-compose down
 - Enable I2C: `sudo raspi-config` > Interface > I2C
 - Check wiring and power
 - View logs: `docker-compose logs sensor`
+- Test metrics: `curl http://localhost:8000/metrics`
+
+**Prometheus issues:**
+- Check Prometheus UI at http://device-ip:9090
+- Verify targets are UP in Status > Targets
+- Check remote_write queue in Status > Runtime
 
 **Network issues:**
 - Verify `priv_lan` network exists

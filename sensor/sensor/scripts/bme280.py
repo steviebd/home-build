@@ -1,7 +1,7 @@
 import os
 import qwiic_bme280
 from time import sleep
-from grafana_cloud_writer import GrafanaCloudPushGateway
+from metrics_server import update_metrics
 
 
 # Measurement name to import to the database
@@ -16,7 +16,7 @@ device_status = False
 
 
 def convertdata():
-# collect and then format the data as a single measurement for influx                     
+# collect and then format the data as a single measurement for prometheus                     
     humidity_level = {"measurement": measurement_name, "tags": {"location": location}, "fields": {"Humidity": float(mySensor.humidity)}}
     pressure_level = {"measurement": measurement_name, "tags": {"location": location}, "fields": {"Pressure": float(mySensor.pressure)}}
     dewpoint_celsius = {"measurement": measurement_name, "tags": {"location": location}, "fields": {"Dewpoint celsius": float(mySensor.dewpoint_celsius)}}
@@ -26,11 +26,8 @@ def convertdata():
     return data_return
 
 
-# Initialize Grafana Cloud writer
-cloud_writer = GrafanaCloudPushGateway()
-
 while True:
     x = convertdata()
-    cloud_writer.push_metrics("bme280_sensor", x)
-    print("wrote BME280 to Grafana Cloud successfully")
+    update_metrics("bme280", x)
+    print("updated BME280 metrics for Prometheus")
     sleep(60)    

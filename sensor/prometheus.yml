@@ -1,0 +1,50 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    origin_prometheus: 'home-monitoring'
+    location: '${DEVICE_DB_LOCATION}'
+
+# Remote write configuration to forward metrics to Grafana Cloud
+remote_write:
+  - url: '${GRAFANA_CLOUD_PUSH_URL}'
+    basic_auth:
+      username: '${GRAFANA_CLOUD_USERNAME}'
+      password: '${GRAFANA_CLOUD_PASSWORD}'
+    queue_config:
+      max_samples_per_send: 1000
+      max_shards: 200
+      capacity: 2500
+
+# Scrape configuration
+scrape_configs:
+  # Scrape Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Scrape sensor metrics
+  - job_name: 'home-sensors'
+    scrape_interval: 30s
+    static_configs:
+      - targets: ['sensor:8000']
+    metrics_path: '/metrics'
+    
+  # Scrape system metrics if available
+  - job_name: 'node-exporter'
+    scrape_interval: 30s
+    static_configs:
+      - targets: ['localhost:9100']
+    # This target is optional - will fail gracefully if node-exporter not running
+
+# Rule files (for alerting - can be added later)
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+# Alerting configuration (can be configured later)
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # - alertmanager:9093
