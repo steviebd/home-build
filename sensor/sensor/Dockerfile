@@ -1,10 +1,10 @@
-FROM balenalib/raspberrypi4-64-python:3.12-run
+FROM balenalib/raspberrypi4-64-debian:bullseye-run
 
 # Enable systemd init system
 ENV INITSYSTEM on
 
 # Install system dependencies for I2C and GPIO
-RUN install_packages i2c-tools python3-dev gcc
+RUN install_packages i2c-tools python3-dev gcc python3-pip
 
 # Set working directory
 WORKDIR /usr/src/app
