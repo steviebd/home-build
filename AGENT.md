@@ -1,7 +1,7 @@
 # AGENT.md - Home Weather Monitoring System
 
 ## Build/Run Commands
-- Build & deploy: `docker-compose up -d` (in /sensor directory)
+- Build & deploy: `docker-compose up -d` (from project root)
 - View logs: `docker-compose logs sensor` or `docker-compose logs prometheus`
 - Test sensor locally: `python3 sensor/sensor/scripts/sensor.py`
 - Test metrics endpoint: `curl http://localhost:8000/metrics`

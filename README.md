@@ -83,6 +83,8 @@ GRAFANA_CLOUD_PASSWORD=your_password
 
 ## Commands
 
+All commands are run from the project root directory:
+
 ```bash
 # View all logs
 docker-compose logs

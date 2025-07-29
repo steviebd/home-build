@@ -1,75 +1,59 @@
-version: '2.1'
+version: '3.8'
 
 volumes:
-  influx_data: {}
-  grafana_data: {}
+  prometheus_data:
 
-services:
+services:  
+  # Sensor service - exposes metrics for Prometheus scraping
   sensor:
     build: ./sensor/sensor
     restart: unless-stopped
+    # Access to the Raspberry Pi system. I2C for sensor communication, GPIO for shutdown buttons
     privileged: true
-    depends_on:
-      - influxdb
-    environment:
-      - INFLUX_DB_BUCKET
-      - INFLUX_DB_TOKEN
-      - INFLUX_DB_ORG
-      - DEVICE_DB_LOCATION
+    env_file: .env  # Environment file in root folder
+    ports:
+      - "8000:8000"  # Metrics endpoint
+    networks:
+      internal:
+        ipv4_address: 172.20.0.3
+      priv_lan:
+        ipv4_address: 192.168.1.192
     labels:
       io.balena.features.dbus: '1'
       io.balena.features.supervisor-api: '1'
 
-  influxdb:
+  # Prometheus - local monitoring and forwarding to Grafana Cloud
+  prometheus:
+    image: prom/prometheus:v2.55.1
     restart: unless-stopped
-    image: influxdb:2.7-alpine
-    volumes:
-      - influx_data:/var/lib/influxdb2
-      - influx_data:/etc/influxdb2
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.enable-lifecycle'
     ports:
-      - "8086:8086"
-    environment:
-      - DOCKER_INFLUXDB_INIT_MODE=setup
-      - DOCKER_INFLUXDB_INIT_USERNAME=admin
-      - DOCKER_INFLUXDB_INIT_PASSWORD
-      - DOCKER_INFLUXDB_INIT_ORG
-      - DOCKER_INFLUXDB_INIT_BUCKET
-      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN
-
-  grafana:
-    build: ./sensor/grafana
-    restart: unless-stopped
-    depends_on:
-      - influxdb
-    ports:
-      - "80:3000"
+      - "9090:9090"
     volumes:
-      - grafana_data:/var/lib/grafana
-    environment:
-      - GF_INSTALL_PLUGINS=grafana-clock-panel
-      - GF_SECURITY_ADMIN_PASSWORD
-      - GF_SERVER_ROOT_URL=http://localhost
-    labels:
-      io.balena.features.supervisor-api: '1'
+      - ./sensor/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    env_file: .env
+    networks:
+      internal:
+        ipv4_address: 172.20.0.2
+      priv_lan:
+        ipv4_address: 192.168.1.193
 
-  telegraf:
-    image: telegraf:1.28-alpine
-    restart: unless-stopped
-    depends_on:
-      - influxdb
-    environment:
-      - INFLUX_DB_BUCKET
-      - INFLUX_DB_TOKEN
-      - INFLUX_DB_ORG
-      - HOST_PROC=/rootfs/proc
-      - HOST_SYS=/rootfs/sys
-      - HOST_ETC=/rootfs/etc
-    volumes:
-      - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /sys:/rootfs/sys:ro
-      - /proc:/rootfs/proc:ro
-      - /etc:/rootfs/etc:ro
-    labels:
-      io.balena.features.procfs: '1'
-      io.balena.features.sysfs: '1'
+networks:
+  # Internal network for container communication
+  internal:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+  
+  # The priv_lan network is already setup, so it is an 'external' network
+  priv_lan:
+    external:
+      name: priv_lan
