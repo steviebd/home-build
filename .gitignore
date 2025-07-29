@@ -11,3 +11,4 @@ pihole/piehole.env
 sensor/sensor/database.env
 dev
 sensor/database.env
+.*pyc

@@ -3,7 +3,6 @@ from multiprocessing import Process
 
 def one(): import bme280
 def two(): import ccs811
-def three(): import weather_bom
 # def four(): import top_phat_button
 
 Process(target=one).start()
