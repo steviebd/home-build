@@ -7,14 +7,8 @@ services:
     restart: unless-stopped
     # Access to the Raspberry Pi system. I2C for sensor communication, GPIO for shutdown buttons
     privileged: true
-    env_file: .env  # Environment file in root folder
     ports:
       - "8000:8000"  # Metrics endpoint
-    networks:
-      internal:
-        ipv4_address: 172.20.0.3
-      priv_lan:
-        ipv4_address: 192.168.1.192
     labels:
       io.balena.features.dbus: '1'
       io.balena.features.supervisor-api: '1'
@@ -35,22 +29,3 @@ services:
     volumes:
       - ./sensor/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
-    env_file: .env
-    networks:
-      internal:
-        ipv4_address: 172.20.0.2
-      priv_lan:
-        ipv4_address: 192.168.1.193
-
-networks:
-  # Internal network for container communication
-  internal:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/24
-  
-  # The priv_lan network is already setup, so it is an 'external' network
-  priv_lan:
-    name: priv_lan
-    external: true
