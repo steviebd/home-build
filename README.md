@@ -1,19 +1,16 @@
 # Home Weather Monitoring System
 
-IoT environmental monitoring using BME280/CCS811 sensors on Raspberry Pi 4 with Docker deployment options.
+IoT environmental monitoring using BME280/CCS811 sensors on Raspberry Pi 4 with Grafana Cloud integration.
 
 ## Quick Start
 
 ```bash
 # Configure environment
 cp .env.example .env
-# Edit .env with your credentials
+# Edit .env with your Grafana Cloud credentials
 
-# Deploy to Grafana Cloud (recommended)
-docker-compose --profile cloud up -d
-
-# OR deploy locally  
-docker-compose --profile local up -d
+# Deploy
+docker-compose up -d
 ```
 
 ## Hardware
@@ -24,17 +21,12 @@ docker-compose --profile local up -d
 
 ## Deployment Options
 
-### Grafana Cloud (Recommended)
-✅ No local infrastructure • ✅ Remote access • ✅ Built-in alerting
+### Grafana Cloud
+✅ No local infrastructure • ✅ Remote access • ✅ Built-in alerting • ✅ Automatic scaling
 
 1. Sign up at https://grafana.com (free tier available)
 2. Get credentials: Cloud Portal > Prometheus > Details
 3. Add to `.env`: `GRAFANA_CLOUD_PUSH_URL`, `GRAFANA_CLOUD_USERNAME`, `GRAFANA_CLOUD_PASSWORD`
-
-### Local Infrastructure
-✅ Full data control • ❌ Manual maintenance required
-
-Uses local InfluxDB 2.0.4, Grafana 7.5.4, and Telegraf containers.
 
 ### Balena Cloud
 ✅ Fleet management • ✅ OTA updates • ✅ Remote monitoring
@@ -68,15 +60,10 @@ All metrics include `location` tag for filtering.
 # Device location tag
 DEVICE_DB_LOCATION=home
 
-# Grafana Cloud (recommended)
+# Grafana Cloud
 GRAFANA_CLOUD_PUSH_URL=https://prometheus-prod-XX.grafana.net/api/prom/push
 GRAFANA_CLOUD_USERNAME=your_username  
 GRAFANA_CLOUD_PASSWORD=your_password
-
-# Local setup (alternative)
-INFLUX_DB_BUCKET=home_monitoring
-INFLUX_DB_TOKEN=your_token
-INFLUX_DB_ORG=your_org
 ```
 
 ## Commands
@@ -86,13 +73,10 @@ INFLUX_DB_ORG=your_org
 docker-compose logs sensor
 
 # Restart
-docker-compose --profile cloud restart
+docker-compose restart
 
 # Stop
 docker-compose down
-
-# Local InfluxDB setup (if using local mode)
-# Access http://device-ip:8086 for initial setup
 ```
 
 ## Architecture
@@ -100,7 +84,7 @@ docker-compose down
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
 │   BME280/CCS811 │───▶│  Raspberry Pi    │───▶│  Grafana Cloud  │
-│     Sensors     │    │   (Docker)       │    │   OR Local DB   │
+│     Sensors     │    │   (Docker)       │    │                 │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
 ```
 
@@ -113,14 +97,13 @@ docker-compose down
 
 **Network issues:**
 - Verify `priv_lan` network exists
-- Check internet connectivity (cloud mode)
+- Check internet connectivity for Grafana Cloud
 - Ensure Docker daemon is running
 
 **Balena deployment:**
 - Privileged containers enabled for GPIO/I2C access
 - Host features: procfs, sysfs for system monitoring
-- Volume persistence for data storage
 
 ---
 
-*Built with Python 3.9, Docker, and [Balena.io](https://balena.io) platform. Based on [influxdb-client-python](https://github.com/influxdata/influxdb-client-python) and SparkFun Qwiic libraries.*
+*Built with Python 3.12, Docker, and [Balena.io](https://balena.io) platform. Based on [influxdb-client-python](https://github.com/influxdata/influxdb-client-python) and SparkFun Qwiic libraries.*

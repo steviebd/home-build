@@ -1,4 +1,4 @@
-FROM balenalib/raspberrypi4-64-python:3.9-run
+FROM balenalib/raspberrypi4-64-python:3.12-run
 
 # Enable systemd init system
 ENV INITSYSTEM on

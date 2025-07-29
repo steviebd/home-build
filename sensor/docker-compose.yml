@@ -1,100 +1,18 @@
-version: '3.6'
+version: '3.8'
 
-volumes:
-  influx_data:
-    external: true
-  grafana_data:
-    external: true
-    
 services:  
-  # Sensor service - works with both local and cloud setups
+  # Sensor service - sends metrics to Grafana Cloud
   sensor:
     build: ./sensor
     restart: unless-stopped
-    # Access to the Raspberry Pi system. I2C for the connection to the pHat pins for the sensors. GPIO for the shutdown buttons.
+    # Access to the Raspberry Pi system. I2C for sensor communication, GPIO for shutdown buttons
     privileged: true
     env_file: ../.env  # Environment file in root folder
-    profiles:
-      - local
-      - cloud
     networks:
-      internal:
-        ipv4_address: 175.40.9.3
       priv_lan:
         ipv4_address: 192.168.1.192
 
-  # Local InfluxDB (only for local setup)  
-  influxdb:
-    restart: unless-stopped
-    image: influxdb:2.0.4
-    profiles:
-      - local
-    networks:
-      internal:
-        ipv4_address: 175.40.9.2
-      priv_lan:
-        ipv4_address: 192.168.1.191
-    volumes:
-      - influx_data:/var/lib/influxdb2
-      - influx_data:/etc/influxdb2
-    ports:
-      - 8086
-      - 8088
-
-  # Local Grafana (only for local setup)
-  grafana:
-    build: ./grafana
-    restart: unless-stopped
-    image: grafana/grafana:7.5.4
-    profiles:
-      - local
-    depends_on:
-      - influxdb
-    ports:
-      - 3000
-    volumes:
-      - 'grafana_data:/var/lib/grafana'
-    environment:
-      - 'GF_INSTALL_PLUGINS=grafana-clock-panel'
-    networks:
-      internal:
-        ipv4_address: 175.40.9.4
-      priv_lan:
-        ipv4_address: 192.168.1.190
-
-  # Telegraf (only for local setup)
-  telegraf:
-    env_file: database.env
-    image: telegraf
-    profiles:
-      - local
-    depends_on:
-      - influxdb
-    ports:
-      - 8125
-      - 8092:8092/udp
-      - 8094
-    environment:
-      HOST_PROC: /rootfs/proc
-      HOST_SYS: /rootfs/sys
-      HOST_ETC: /rootfs/etc
-    volumes:
-      - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /sys:/rootfs/sys:ro
-      - /proc:/rootfs/proc:ro
-      - /etc:/rootfs/etc:ro
-    networks:
-      internal:
-        ipv4_address: 175.40.9.5    
-
 networks:
-  # Create the internal network (for local setup)
-  internal:
-    ipam:
-      config:
-        - subnet: 175.40.9.0/29
-
   # The priv_lan network is already setup, so it is an 'external' network
   priv_lan:
     external:
