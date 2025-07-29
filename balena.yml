@@ -1,4 +1,4 @@
-applicationName: "home-monitoring-system"
+type: "sw.application"
 name: "home-weather-monitoring"
 version: "1.0.0"
 description: "IoT environmental monitoring system with InfluxDB, Grafana, and environmental sensors"
