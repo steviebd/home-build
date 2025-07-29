@@ -1,5 +1,4 @@
-volumes:
-  prometheus_data:
+
 
 services:  
   # Sensor service - exposes metrics for Prometheus scraping
