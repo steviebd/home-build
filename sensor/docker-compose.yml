@@ -7,23 +7,28 @@ volumes:
     external: true
     
 services:  
+  # Sensor service - works with both local and cloud setups
   sensor:
     build: ./sensor
     restart: unless-stopped
-    # Access to the Raspberry Pi system. I2C for the connection to the pHat pins for the sensors. GPIO for the shutdown buttons. Normal device functions don't seem to be working
+    # Access to the Raspberry Pi system. I2C for the connection to the pHat pins for the sensors. GPIO for the shutdown buttons.
     privileged: true
-    depends_on:
-      - influxdb
-    # 1. Join the internal network so Sensor can upload data to the database
-    env_file: database.env
+    env_file: ../.env  # Environment file in root folder
+    profiles:
+      - local
+      - cloud
     networks:
       internal:
         ipv4_address: 175.40.9.3
+      priv_lan:
+        ipv4_address: 192.168.1.192
 
+  # Local InfluxDB (only for local setup)  
   influxdb:
     restart: unless-stopped
     image: influxdb:2.0.4
-    # Attach influxdb only to the private network
+    profiles:
+      - local
     networks:
       internal:
         ipv4_address: 175.40.9.2
@@ -36,10 +41,13 @@ services:
       - 8086
       - 8088
 
+  # Local Grafana (only for local setup)
   grafana:
     build: ./grafana
     restart: unless-stopped
     image: grafana/grafana:7.5.4
+    profiles:
+      - local
     depends_on:
       - influxdb
     ports:
@@ -54,9 +62,12 @@ services:
       priv_lan:
         ipv4_address: 192.168.1.190
 
+  # Telegraf (only for local setup)
   telegraf:
     env_file: database.env
     image: telegraf
+    profiles:
+      - local
     depends_on:
       - influxdb
     ports:
@@ -77,9 +88,8 @@ services:
       internal:
         ipv4_address: 175.40.9.5    
 
-
 networks:
-  # Create the internal network
+  # Create the internal network (for local setup)
   internal:
     ipam:
       config:
