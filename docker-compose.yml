@@ -7,8 +7,8 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DEVICE_DB_LOCATION: ${DEVICE_DB_LOCATION}
-      - PROMETHEUS_JOB_NAME: ${PROMETHEUS_JOB_NAME}
+      DEVICE_DB_LOCATION: $DEVICE_DB_LOCATION
+      PROMETHEUS_JOB_NAME: $PROMETHEUS_JOB_NAME
     labels:
       io.balena.features.dbus: '1'
       io.balena.features.supervisor-api: '1'
@@ -27,11 +27,11 @@ services:
     volumes:
       - prometheus-data:/prometheus
     environment:
-      - GRAFANA_CLOUD_PUSH_URL: ${GRAFANA_CLOUD_PUSH_URL}
-      - GRAFANA_CLOUD_USERNAME: ${GRAFANA_CLOUD_USERNAME}
-      - GRAFANA_CLOUD_PASSWORD: ${GRAFANA_CLOUD_PASSWORD}
-      - DEVICE_DB_LOCATION: ${DEVICE_DB_LOCATION}
-      - PROMETHEUS_JOB_NAME: ${PROMETHEUS_JOB_NAME}
+      GRAFANA_CLOUD_PUSH_URL: ${GRAFANA_CLOUD_PUSH_URL}
+      GRAFANA_CLOUD_USERNAME: ${GRAFANA_CLOUD_USERNAME}
+      GRAFANA_CLOUD_PASSWORD: ${GRAFANA_CLOUD_PASSWORD}
+      DEVICE_DB_LOCATION: ${DEVICE_DB_LOCATION}
+      PROMETHEUS_JOB_NAME: ${PROMETHEUS_JOB_NAME}
 
 volumes:
   prometheus-data:
