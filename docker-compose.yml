@@ -1,5 +1,4 @@
-volumes:
-  prometheus_data:
+version: '2'
 
 services:
   sensor:
@@ -8,9 +7,11 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DEVICE_DB_LOCATION=${DEVICE_DB_LOCATION}
-      - PROMETHEUS_JOB_NAME=${PROMETHEUS_JOB_NAME}
-    restart: unless-stopped
+      - DEVICE_DB_LOCATION
+      - PROMETHEUS_JOB_NAME
+    labels:
+      io.balena.features.dbus: '1'
+      io.balena.features.supervisor-api: '1'
 
   prometheus:
     build: ./prometheus
@@ -24,12 +25,13 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - prometheus_data:/prometheus
+      - prometheus-data:/prometheus
     environment:
-      - GRAFANA_CLOUD_PUSH_URL=${GRAFANA_CLOUD_PUSH_URL}
-      - GRAFANA_CLOUD_USERNAME=${GRAFANA_CLOUD_USERNAME}
-      - GRAFANA_CLOUD_PASSWORD=${GRAFANA_CLOUD_PASSWORD}
-      - DEVICE_DB_LOCATION=${DEVICE_DB_LOCATION}
-    depends_on:
-      - sensor
-    restart: unless-stopped
+      - GRAFANA_CLOUD_PUSH_URL
+      - GRAFANA_CLOUD_USERNAME
+      - GRAFANA_CLOUD_PASSWORD
+      - DEVICE_DB_LOCATION
+      - PROMETHEUS_JOB_NAME
+
+volumes:
+  prometheus-data:
