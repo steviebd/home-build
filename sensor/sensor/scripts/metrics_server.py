@@ -20,7 +20,22 @@ class MetricsHandler(BaseHTTPRequestHandler):
     
     def get_prometheus_metrics(self):
         """Generate Prometheus format metrics from stored sensor data"""
-        global latest_metrics
+        import json
+        import fcntl
+        
+        # Read metrics from shared file
+        latest_metrics = {}
+        metrics_file = '/tmp/sensor_metrics.json'
+        try:
+            with open(metrics_file, 'r') as f:
+                fcntl.flock(f.fileno(), fcntl.LOCK_SH)
+                latest_metrics = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            # Use empty dict if file doesn't exist
+            pass  # latest_metrics is already initialized as {}
+        except Exception as e:
+            print(f"Error reading metrics file: {e}")
+            latest_metrics = {}
         
         output = []
         timestamp = int(time.time() * 1000)
@@ -43,16 +58,32 @@ class MetricsHandler(BaseHTTPRequestHandler):
         # Add metrics with current values
         job_name = os.getenv("PROMETHEUS_JOB_NAME", "home-sensors")
         if 'bme280' in latest_metrics:
-            bme = latest_metrics['bme280']
-            output.append(f'bme280_temperature_celsius{{job="{job_name}",location="{location}"}} {bme.get("Celsius", 0)} {timestamp}')
-            output.append(f'bme280_humidity_percent{{job="{job_name}",location="{location}"}} {bme.get("Humidity", 0)} {timestamp}')
-            output.append(f'bme280_pressure_hpa{{job="{job_name}",location="{location}"}} {bme.get("Pressure", 0)} {timestamp}')
-            output.append(f'bme280_dewpoint_celsius{{job="{job_name}",location="{location}"}} {bme.get("Dewpoint celsius", 0)} {timestamp}')
+            sensor_data = latest_metrics['bme280']
+            metrics = sensor_data.get('metrics', {}) if isinstance(sensor_data, dict) else sensor_data
+            tags = sensor_data.get('tags', {}) if isinstance(sensor_data, dict) else {}
+            
+            # Build label string with all available tags
+            labels = f'job="{job_name}",location="{tags.get("location", location)}"'
+            if 'data_source' in tags:
+                labels += f',data_source="{tags["data_source"]}"'
+            
+            output.append(f'bme280_temperature_celsius{{{labels}}} {metrics.get("Celsius", 0)} {timestamp}')
+            output.append(f'bme280_humidity_percent{{{labels}}} {metrics.get("Humidity", 0)} {timestamp}')
+            output.append(f'bme280_pressure_hpa{{{labels}}} {metrics.get("Pressure", 0)} {timestamp}')
+            output.append(f'bme280_dewpoint_celsius{{{labels}}} {metrics.get("Dewpoint celsius", 0)} {timestamp}')
         
         if 'ccs811' in latest_metrics:
-            ccs = latest_metrics['ccs811']
-            output.append(f'ccs811_co2_ppm{{job="{job_name}",location="{location}"}} {ccs.get("co2", 0)} {timestamp}')
-            output.append(f'ccs811_tvoc_ppb{{job="{job_name}",location="{location}"}} {ccs.get("tVOC", 0)} {timestamp}')
+            sensor_data = latest_metrics['ccs811']
+            metrics = sensor_data.get('metrics', {}) if isinstance(sensor_data, dict) else sensor_data
+            tags = sensor_data.get('tags', {}) if isinstance(sensor_data, dict) else {}
+            
+            # Build label string with all available tags
+            labels = f'job="{job_name}",location="{tags.get("location", location)}"'
+            if 'data_source' in tags:
+                labels += f',data_source="{tags["data_source"]}"'
+            
+            output.append(f'ccs811_co2_ppm{{{labels}}} {metrics.get("co2", 0)} {timestamp}')
+            output.append(f'ccs811_tvoc_ppb{{{labels}}} {metrics.get("tVOC", 0)} {timestamp}')
         
         return '\n'.join(output) + '\n'
 
@@ -86,17 +117,50 @@ class MetricsServer:
             self.server.server_close()
 
 def update_metrics(sensor_type, metrics_data):
-    """Update the global metrics storage with new sensor data"""
-    global latest_metrics
+    """Update the shared metrics storage with new sensor data"""
+    import json
+    import fcntl
     
-    # Convert list of metric dictionaries to a single dictionary
+    # Convert list of metric dictionaries to combined metrics with tags
     combined_metrics = {}
+    combined_tags = {}
     for data_point in metrics_data:
         fields = data_point.get('fields', {})
+        tags = data_point.get('tags', {})
         combined_metrics.update(fields)
+        combined_tags.update(tags)
     
-    latest_metrics[sensor_type] = combined_metrics
-    print(f"Updated {sensor_type} metrics: {combined_metrics}")
+    # Write to shared file with file locking
+    metrics_file = '/tmp/sensor_metrics.json'
+    try:
+        # Read existing data
+        try:
+            with open(metrics_file, 'r') as f:
+                fcntl.flock(f.fileno(), fcntl.LOCK_SH)
+                current_data = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            current_data = {}
+        
+        # Update with new data (include both metrics and tags)
+        current_data[sensor_type] = {
+            'metrics': combined_metrics,
+            'tags': combined_tags
+        }
+        
+        # Write back to file
+        with open(metrics_file, 'w') as f:
+            fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+            json.dump(current_data, f)
+            
+        print(f"Updated {sensor_type} metrics: {combined_metrics}")
+    except Exception as e:
+        print(f"Error updating metrics file: {e}")
+        # Fallback to in-memory for this process
+        global latest_metrics
+        latest_metrics[sensor_type] = {
+            'metrics': combined_metrics,
+            'tags': combined_tags
+        }
 
 # Convenience function to start the server
 def start_metrics_server(port=8000):
