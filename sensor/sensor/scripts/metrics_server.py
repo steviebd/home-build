@@ -41,17 +41,18 @@ class MetricsHandler(BaseHTTPRequestHandler):
         output.append('# TYPE ccs811_tvoc_ppb gauge')
         
         # Add metrics with current values
+        job_name = os.getenv("PROMETHEUS_JOB_NAME", "home-sensors")
         if 'bme280' in latest_metrics:
             bme = latest_metrics['bme280']
-            output.append(f'bme280_temperature_celsius{{location="{location}"}} {bme.get("Celsius", 0)} {timestamp}')
-            output.append(f'bme280_humidity_percent{{location="{location}"}} {bme.get("Humidity", 0)} {timestamp}')
-            output.append(f'bme280_pressure_hpa{{location="{location}"}} {bme.get("Pressure", 0)} {timestamp}')
-            output.append(f'bme280_dewpoint_celsius{{location="{location}"}} {bme.get("Dewpoint celsius", 0)} {timestamp}')
+            output.append(f'bme280_temperature_celsius{{job="{job_name}",location="{location}"}} {bme.get("Celsius", 0)} {timestamp}')
+            output.append(f'bme280_humidity_percent{{job="{job_name}",location="{location}"}} {bme.get("Humidity", 0)} {timestamp}')
+            output.append(f'bme280_pressure_hpa{{job="{job_name}",location="{location}"}} {bme.get("Pressure", 0)} {timestamp}')
+            output.append(f'bme280_dewpoint_celsius{{job="{job_name}",location="{location}"}} {bme.get("Dewpoint celsius", 0)} {timestamp}')
         
         if 'ccs811' in latest_metrics:
             ccs = latest_metrics['ccs811']
-            output.append(f'ccs811_co2_ppm{{location="{location}"}} {ccs.get("co2", 0)} {timestamp}')
-            output.append(f'ccs811_tvoc_ppb{{location="{location}"}} {ccs.get("tVOC", 0)} {timestamp}')
+            output.append(f'ccs811_co2_ppm{{job="{job_name}",location="{location}"}} {ccs.get("co2", 0)} {timestamp}')
+            output.append(f'ccs811_tvoc_ppb{{job="{job_name}",location="{location}"}} {ccs.get("tVOC", 0)} {timestamp}')
         
         return '\n'.join(output) + '\n'
 

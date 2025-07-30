@@ -9,6 +9,10 @@ services:
     privileged: true
     ports:
       - "8000:8000"
+    environment:
+      - DEVICE_DB_LOCATION=${DEVICE_DB_LOCATION}
+      - PROMETHEUS_JOB_NAME=${PROMETHEUS_JOB_NAME}
+    restart: unless-stopped
 
   prometheus:
     build: ./prometheus
@@ -23,3 +27,11 @@ services:
       - "9090:9090"
     volumes:
       - prometheus_data:/prometheus
+    environment:
+      - GRAFANA_CLOUD_PUSH_URL=${GRAFANA_CLOUD_PUSH_URL}
+      - GRAFANA_CLOUD_USERNAME=${GRAFANA_CLOUD_USERNAME}
+      - GRAFANA_CLOUD_PASSWORD=${GRAFANA_CLOUD_PASSWORD}
+      - DEVICE_DB_LOCATION=${DEVICE_DB_LOCATION}
+    depends_on:
+      - sensor
+    restart: unless-stopped
