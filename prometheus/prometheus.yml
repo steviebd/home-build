@@ -2,16 +2,11 @@ global:
   scrape_interval: 60s
   external_labels:
     origin_prometheus: 'home-monitoring'
-    location: '${DEVICE_DB_LOCATION}'
 
-# Remote write configuration to forward metrics to Grafana Cloud
-remote_write:
-  - url: ${GRAFANA_CLOUD_PUSH_URL}
-    basic_auth:
-      username: ${GRAFANA_CLOUD_USERNAME}
-      password: ${GRAFANA_CLOUD_PASSWORD}
+# Note: In Balena Cloud, environment variable substitution in config files
+# doesn't work the same way. We'll handle remote_write through runtime config
+# or use a startup script if needed.
 
-# Scrape configuration
 scrape_configs:
   # Scrape Prometheus itself
   - job_name: 'prometheus'

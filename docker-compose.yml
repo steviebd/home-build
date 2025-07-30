@@ -32,6 +32,9 @@ services:
       GRAFANA_CLOUD_PASSWORD: ${GRAFANA_CLOUD_PASSWORD}
       DEVICE_DB_LOCATION: ${DEVICE_DB_LOCATION}
       PROMETHEUS_JOB_NAME: ${PROMETHEUS_JOB_NAME}
+    labels:
+      io.balena.features.supervisor-api: '1'
+
 
 volumes:
   prometheus-data:
